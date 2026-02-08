@@ -12,6 +12,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
       - name: Install dependencies
         run: |
           sudo apt-get update
@@ -19,13 +24,13 @@ jobs:
 
       - name: Configure
         run: |
-          cmake -S industrial_robot_core -B industrial_robot_core/build -DCMAKE_BUILD_TYPE=Release \
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
             -DROBOT_MOTION_CORE_BUILD_PYTHON=OFF
 
       - name: Build
         run: |
-          cmake --build industrial_robot_core/build --parallel
+          cmake --build build -j
 
       - name: Test
         run: |
-          ctest --test-dir industrial_robot_core/build --output-on-failure
+          ctest --test-dir build --output-on-failure
