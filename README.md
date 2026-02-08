@@ -103,6 +103,22 @@ GitHub Actions runs a matrix on **ubuntu-latest** and **macos-latest** with Pyth
 - Improve benchmark reporting (histograms, percentiles beyond P99, JSON output).
 - Expand regression tests for edge cases (singularities, joint limits, unreachable targets).
 
+## UR5 Example
+
+This repo also includes a UR5 model example (using a commonly-used UR5 DH table; units: meters) with random FK->IK round-trip statistics.
+
+Run:
+
+```bash
+PYTHONPATH=build python3 examples/ur5_demo.py
+```
+
+Preview:
+
+![UR5 pose](examples/ur5_pose.png)
+
+## Units / Conventions
+
 - The demo DH parameters in `examples/demo.py` are in **millimeters (mm)**.
 - `TaskSpaceWeights.pos_unit` scales translation units (e.g., `0.001` for mm -> m) so translation and rotation errors are comparable.
 

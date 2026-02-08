@@ -93,6 +93,10 @@ if(ROBOT_MOTION_CORE_BUILD_TESTS)
     target_link_libraries(test_ik_near_singular PRIVATE robot_motion_core::robot_motion_core)
     add_test(NAME robot_motion_core.test_ik_near_singular COMMAND test_ik_near_singular)
 
+    add_executable(test_ik_ur5 tests/test_ik_ur5.cpp)
+    target_link_libraries(test_ik_ur5 PRIVATE robot_motion_core::robot_motion_core)
+    add_test(NAME robot_motion_core.test_ik_ur5 COMMAND test_ik_ur5)
+
     add_executable(benchmark_ik tests/benchmark_ik.cpp)
     target_link_libraries(benchmark_ik PRIVATE robot_motion_core::robot_motion_core)
 endif()
