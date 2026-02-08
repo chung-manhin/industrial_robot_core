@@ -98,6 +98,9 @@ IkResult IKSolverDls::solve(const Matrix4d& target_pose,
         const Eigen::Matrix3d R_err = R_des * R.transpose();
         const Eigen::Vector3d e_w = RobotArm::so3LogVee(R_err);
 
+        // 6D task-space error used by the solver.
+        // - translation error uses DH length unit (often mm) and is scaled by pos_unit
+        // - rotation error uses so(3) logarithm (axis-angle vector in radians)
         ws->e.template block<3, 1>(0, 0) = weights.w_pos * (weights.pos_unit * e_p);
         ws->e.template block<3, 1>(3, 0) = weights.w_rot * e_w;
 
@@ -109,6 +112,7 @@ IkResult IKSolverDls::solve(const Matrix4d& target_pose,
             return out;
         }
 
+        // Stop condition: reach requested tolerance.
         if (err < options.tol) {
             out.status = IkStatus::kSuccess;
             out.q = q;
@@ -116,12 +120,17 @@ IkResult IKSolverDls::solve(const Matrix4d& target_pose,
         }
 
         ws->J = arm_.computeJacobian(q);
-        // Weight + unit scaling consistent with error definition.
+        // Weight + unit scaling consistent with error definition above.
         ws->J.template block<3, 6>(0, 0) *= (weights.w_pos * weights.pos_unit);
         ws->J.template block<3, 6>(3, 0) *= weights.w_rot;
 
         ws->JJt.noalias() = ws->J * ws->J.transpose();
 
+        // Adaptive damping based on manipulability.
+        // w = sqrt(det(JJ^T)) (with an epsilon guard), then:
+        //   λ = clamp(lambda0 * (w_ref / (w + eps)), [lambda_min, lambda_max])
+        // DLS solve uses:
+        //   dq = J^T (J J^T + λ^2 I)^{-1} e
         const double w = manipulabilityFromJJt(ws->JJt, options.eps);
         const double lambda = clampd(options.lambda0 * (options.w_ref / (w + options.eps)),
                                      options.lambda_min,
@@ -220,7 +229,8 @@ IkResult IKSolverDls::solveBestOf(const Matrix4d& target_pose,
             }
         }
 
-        // Fast-path: if a seed already reaches tolerance, return immediately.
+        // Multi-seed early return: if any seed already meets tolerance, return it
+        // immediately without evaluating remaining seeds.
         if (best.status == IkStatus::kSuccess && best.final_error <= options.tol) {
             return best;
         }
