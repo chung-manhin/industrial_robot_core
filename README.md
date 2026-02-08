@@ -61,11 +61,21 @@ Example output (machine-dependent):
 
 ```text
 IK Benchmark (10000 trials)
-Avg (us): 1.657
-P99 (us): 2.444
-Max (us): 17.111
+Seed mode: multi-seed
+Avg (us): 1.602
+P99 (us): 2.375
+Max (us): 27.308
 Success rate: 100.000%
 ```
+
+### Single vs multi seed (example)
+
+The absolute numbers depend on CPU, compiler, and build flags. The comparison below is from one run on the developer machine:
+
+| Mode | Success rate | Avg (us) | P99 (us) | Max (us) |
+|------|--------------|----------|----------|----------|
+| `--single-seed` | 72.390% | 150.175 | 468.978 | 1042.230 |
+| `--multi-seed` (default) | 100.000% | 1.602 | 2.375 | 27.308 |
 
 ## Python demo
 

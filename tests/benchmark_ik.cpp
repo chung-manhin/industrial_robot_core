@@ -12,6 +12,7 @@
 #include <iostream>
 #include <numeric>
 #include <random>
+#include <string_view>
 #include <vector>
 
 using robot::DHParam;
@@ -29,17 +30,44 @@ static double deg2rad(double deg) { return deg * M_PI / 180.0; }
 static std::vector<DHParam> makeIrb120Dh() {
     // ABB IRB 120 standard DH. Units: mm.
     return {
-        {0.0, deg2rad(-90.0), 290.0, 0.0},           // 1
-        {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},  // 2 (offset)
-        {70.0, deg2rad(-90.0), 0.0, 0.0},            // 3
-        {0.0, deg2rad(90.0), 302.0, 0.0},            // 4
-        {0.0, deg2rad(-90.0), 0.0, 0.0},             // 5
-        {0.0, deg2rad(0.0), 72.0, 0.0}               // 6
+        {0.0, deg2rad(-90.0), 290.0, 0.0},            // 1
+        {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},   // 2 (offset)
+        {70.0, deg2rad(-90.0), 0.0, 0.0},             // 3
+        {0.0, deg2rad(90.0), 302.0, 0.0},             // 4
+        {0.0, deg2rad(-90.0), 0.0, 0.0},              // 5
+        {0.0, deg2rad(0.0), 72.0, 0.0}                // 6
     };
 }
 
-int main() {
+enum class SeedMode {
+    kSingle,
+    kMulti
+};
+
+static SeedMode parseSeedMode(int argc, char** argv) {
+    SeedMode mode = SeedMode::kMulti;
+    for (int i = 1; i < argc; ++i) {
+        const std::string_view a(argv[i]);
+        if (a == "--single-seed") mode = SeedMode::kSingle;
+        if (a == "--multi-seed") mode = SeedMode::kMulti;
+    }
+    return mode;
+}
+
+static const char* seedModeName(SeedMode m) {
+    switch (m) {
+    case SeedMode::kSingle:
+        return "single-seed";
+    case SeedMode::kMulti:
+        return "multi-seed";
+    }
+    return "unknown";
+}
+
+int main(int argc, char** argv) {
     constexpr int kTrials = 10000;
+
+    const SeedMode seed_mode = parseSeedMode(argc, argv);
 
     RobotArm arm(makeIrb120Dh());
     if (!arm.isValid()) {
@@ -78,6 +106,7 @@ int main() {
 
     int success = 0;
 
+    // Preallocate seeds once and reuse every trial.
     std::vector<Vector6d> seeds(5);
 
     // Warm up
@@ -99,11 +128,20 @@ int main() {
 
         const robot::Matrix4d T_target = arm.computeFK(q_target);
 
-        // Exactly 5 seeds: [q_target, zero, random, random, random].
-        seeds[0] = q_target;
-        seeds[1] = Vector6d::Zero();
-        for (int k = 2; k < 5; ++k) {
-            for (int i = 0; i < 6; ++i) seeds[k](i) = uni(rng);
+        if (seed_mode == SeedMode::kSingle) {
+            // Single seed: use only a deterministic seed (zero) to measure baseline.
+            seeds[0] = Vector6d::Zero();
+            seeds[1] = seeds[0];
+            seeds[2] = seeds[0];
+            seeds[3] = seeds[0];
+            seeds[4] = seeds[0];
+        } else {
+            // Multi-seed: exactly 5 seeds: [q_target, zero, random, random, random].
+            seeds[0] = q_target;
+            seeds[1] = Vector6d::Zero();
+            for (int k = 2; k < 5; ++k) {
+                for (int i = 0; i < 6; ++i) seeds[k](i) = uni(rng);
+            }
         }
 
         const auto t0 = std::chrono::high_resolution_clock::now();
@@ -129,6 +167,7 @@ int main() {
     std::cout.precision(3);
 
     std::cout << "IK Benchmark (" << kTrials << " trials)\n";
+    std::cout << "Seed mode: " << seedModeName(seed_mode) << "\n";
     std::cout << "Avg (us): " << avg << "\n";
     std::cout << "P99 (us): " << p99 << "\n";
     std::cout << "Max (us): " << max << "\n";
