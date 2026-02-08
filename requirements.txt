@@ -1,0 +1,4 @@
+# Minimal runtime dependencies for CI smoke and examples.
+#
+# CI runs examples/demo.py (and may run other example scripts) to generate pose images.
+matplotlib

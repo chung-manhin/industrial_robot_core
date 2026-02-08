@@ -6,6 +6,9 @@ set -euo pipefail
 : "${PYTHON:=python}"
 : "${BUILD_DIR:=build}"
 
+# Ensure BUILD_DIR exists before tee writes logs into it.
+mkdir -p "${BUILD_DIR}"
+
 PYTHON_BIN="$(command -v "${PYTHON}")"
 
 cmake -S . -B "${BUILD_DIR}" -DCMAKE_BUILD_TYPE=Release \

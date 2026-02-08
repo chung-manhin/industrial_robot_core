@@ -1,0 +1,2 @@
+# Development-only dependencies (CI format/lint)
+pre-commit==3.7.1
