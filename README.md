@@ -97,7 +97,11 @@ GitHub Actions runs a matrix on **ubuntu-latest** and **macos-latest** with Pyth
 - run Python demo to generate `examples/robot_pose.png` and verify it is non-empty
 - upload artifacts: `robot_pose.png` + benchmark/demo logs
 
-## Units / Conventions
+## Roadmap
+
+- Add a command-line tool for IK solving and benchmarking presets.
+- Improve benchmark reporting (histograms, percentiles beyond P99, JSON output).
+- Expand regression tests for edge cases (singularities, joint limits, unreachable targets).
 
 - The demo DH parameters in `examples/demo.py` are in **millimeters (mm)**.
 - `TaskSpaceWeights.pos_unit` scales translation units (e.g., `0.001` for mm -> m) so translation and rotation errors are comparable.
