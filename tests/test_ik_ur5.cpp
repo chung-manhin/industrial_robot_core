@@ -10,9 +10,9 @@
 #include <vector>
 
 using robot::DHParam;
-using robot::IKSolverDls;
 using robot::IkOptions;
 using robot::IkResult;
+using robot::IKSolverDls;
 using robot::IkStatus;
 using robot::JointLimits;
 using robot::RobotArm;
@@ -24,12 +24,8 @@ static std::vector<DHParam> makeUr5DhM() {
     // (a, alpha, d, theta_offset)
     const double pi = M_PI;
     return {
-        {0.0, pi / 2.0, 0.089159, 0.0},
-        {-0.425, 0.0, 0.0, 0.0},
-        {-0.39225, 0.0, 0.0, 0.0},
-        {0.0, pi / 2.0, 0.10915, 0.0},
-        {0.0, -pi / 2.0, 0.09465, 0.0},
-        {0.0, 0.0, 0.0823, 0.0},
+        {0.0, pi / 2.0, 0.089159, 0.0}, {-0.425, 0.0, 0.0, 0.0},        {-0.39225, 0.0, 0.0, 0.0},
+        {0.0, pi / 2.0, 0.10915, 0.0},  {0.0, -pi / 2.0, 0.09465, 0.0}, {0.0, 0.0, 0.0823, 0.0},
     };
 }
 
@@ -73,17 +69,20 @@ int main() {
 
     for (int t = 0; t < kTrials; ++t) {
         Vector6d q_target;
-        for (int i = 0; i < 6; ++i) q_target(i) = uni(rng);
+        for (int i = 0; i < 6; ++i)
+            q_target(i) = uni(rng);
 
         const robot::Matrix4d T_target = arm.computeFK(q_target);
 
         seeds[0] = q_target;
         seeds[1] = Vector6d::Zero();
         for (int k = 2; k < 5; ++k) {
-            for (int i = 0; i < 6; ++i) seeds[k](i) = uni(rng);
+            for (int i = 0; i < 6; ++i)
+                seeds[k](i) = uni(rng);
         }
 
-        const IkResult r = solver.solveBestOf(T_target, seeds, opt, &limits, weights, &ws, &q_target);
+        const IkResult r =
+            solver.solveBestOf(T_target, seeds, opt, &limits, weights, &ws, &q_target);
         if (r.status != IkStatus::kSuccess) {
             std::cerr << "UR5 IK failed at t=" << t << " status=" << static_cast<int>(r.status)
                       << " final_error=" << r.final_error << "\n";
