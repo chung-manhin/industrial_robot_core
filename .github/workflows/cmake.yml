@@ -5,8 +5,15 @@ on:
   pull_request:
 
 jobs:
-  build-and-test:
-    runs-on: ubuntu-latest
+  build-test-benchmark-demo:
+    name: ${{ matrix.os }} / py${{ matrix.python-version }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        python-version: ["3.10", "3.11", "3.12", "3.13"]
 
     steps:
       - name: Checkout
@@ -15,22 +22,55 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: ${{ matrix.python-version }}
+          cache: pip
 
-      - name: Install dependencies
+      - name: Install dependencies (Ubuntu)
+        if: runner.os == 'Linux'
         run: |
           sudo apt-get update
-          sudo apt-get install -y libeigen3-dev
+          sudo apt-get install -y libeigen3-dev ninja-build ccache
 
-      - name: Configure
+      - name: Install dependencies (macOS)
+        if: runner.os == 'macOS'
         run: |
-          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
-            -DROBOT_MOTION_CORE_BUILD_PYTHON=OFF
+          brew update
+          brew install eigen ninja ccache
 
-      - name: Build
+      - name: Configure ccache
         run: |
-          cmake --build build -j
+          echo "CCACHE_DIR=${{ github.workspace }}/.ccache" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESS=1" >> $GITHUB_ENV
+          echo "CCACHE_COMPRESSLEVEL=6" >> $GITHUB_ENV
+          echo "CCACHE_MAXSIZE=200M" >> $GITHUB_ENV
 
-      - name: Test
+      - name: Cache ccache
+        uses: actions/cache@v4
+        with:
+          path: .ccache
+          key: ccache-${{ runner.os }}-py${{ matrix.python-version }}-${{ hashFiles('**/CMakeLists.txt', '**/*.cmake', '**/*.cpp', '**/*.hpp', '**/*.h') }}
+          restore-keys: |
+            ccache-${{ runner.os }}-py${{ matrix.python-version }}-
+
+      - name: Install Python deps
         run: |
-          ctest --test-dir build --output-on-failure
+          python -m pip install --upgrade pip
+          python -m pip install matplotlib
+
+      - name: Run CI smoke
+        env:
+          MPLBACKEND: Agg
+          CCACHE_DIR: ${{ env.CCACHE_DIR }}
+        run: |
+          ./tools/ci_smoke.sh 2>&1 | tee build/ci_smoke.log
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: artifacts-${{ matrix.os }}-py${{ matrix.python-version }}
+          if-no-files-found: error
+          path: |
+            examples/robot_pose.png
+            build/benchmark.txt
+            build/ci_smoke.log

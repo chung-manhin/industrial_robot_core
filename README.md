@@ -1,5 +1,10 @@
 # industrial_robot_core
 
+![ci](https://github.com/chung-manhin/industrial_robot_core/actions/workflows/cmake.yml/badge.svg)
+![license](https://img.shields.io/badge/license-MIT-blue)
+![cpp](https://img.shields.io/badge/C%2B%2B-17-blue)
+![pybind11](https://img.shields.io/badge/python-pybind11-informational)
+
 Industrial robot kinematics core library (C++17 + pybind11) for 6-DoF manipulators: forward kinematics (FK), Jacobian, and damped least-squares inverse kinematics (DLS IK). Includes C++ tests/benchmark and a Python demo that renders a pose image.
 
 ## Requirements
@@ -7,37 +12,33 @@ Industrial robot kinematics core library (C++17 + pybind11) for 6-DoF manipulato
 - C++17 compiler (GCC/Clang)
 - CMake >= 3.16
 - Eigen3
-- Python 3 (optional; only required for Python bindings/demo)
-- matplotlib (optional; only required to run `examples/demo.py`)
+- Python 3 (required for Python bindings/demo)
+- matplotlib (required for `examples/demo.py`)
 
 Ubuntu example:
 
 ```bash
 sudo apt-get update
 sudo apt-get install -y cmake g++ libeigen3-dev python3 python3-pip
-# Optional for demo:
 python3 -m pip install --user matplotlib
 ```
 
-## Quick Start
+macOS example (Homebrew):
+
+```bash
+brew install cmake eigen python
+python3 -m pip install --user matplotlib
+```
+
+## Quick start (Linux/macOS)
 
 From clone to generating `examples/robot_pose.png`:
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/chung-manhin/industrial_robot_core.git
 cd industrial_robot_core_clean
 
-cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
-
-ctest --test-dir build --output-on-failure
-./build/benchmark_ik
-
-# (Optional) Python demo: requires matplotlib
-PYTHONPATH=build python3 examples/demo.py
-
-# Verify the output image is present and non-empty
-test -s examples/robot_pose.png
+./tools/ci_smoke.sh
 ```
 
 Preview:
@@ -56,6 +57,16 @@ ctest --test-dir build --output-on-failure
 ./build/benchmark_ik
 ```
 
+Example output (machine-dependent):
+
+```text
+IK Benchmark (10000 trials)
+Avg (us): 1.657
+P99 (us): 2.444
+Max (us): 17.111
+Success rate: 100.000%
+```
+
 ## Python demo
 
 ```bash
@@ -66,16 +77,26 @@ Output:
 
 - `examples/robot_pose.png`
 
+## CI
+
+GitHub Actions runs a matrix on **ubuntu-latest** and **macos-latest** with Python **3.10/3.11/3.12/3.13**. Each job executes the same smoke script:
+
+- CMake configure/build (Release)
+- `ctest --output-on-failure`
+- run `benchmark_ik` (logs saved)
+- run Python demo to generate `examples/robot_pose.png` and verify it is non-empty
+- upload artifacts: `robot_pose.png` + benchmark/demo logs
+
 ## Units / Conventions
 
 - The demo DH parameters in `examples/demo.py` are in **millimeters (mm)**.
-- `TaskSpaceWeights.pos_unit` is used to scale position units (e.g., `0.001` for mm -> m) so that position and rotation errors are comparable.
+- `TaskSpaceWeights.pos_unit` scales translation units (e.g., `0.001` for mm -> m) so translation and rotation errors are comparable.
 
 ## FAQ
 
 **Q: `examples/demo.py` fails with `ImportError: matplotlib`**
 
-A: matplotlib is optional and not needed for the C++ library/tests. Install it to run the demo:
+A: Install matplotlib:
 
 ```bash
 python3 -m pip install --user matplotlib
