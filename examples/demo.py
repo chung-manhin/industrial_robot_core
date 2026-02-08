@@ -7,7 +7,9 @@ import industrial_robot_core as irc
 try:
     import matplotlib.pyplot as plt
 except ImportError:
-    print("matplotlib is required for visualization. Install with: python3 -m pip install matplotlib")
+    print(
+        "matplotlib is required for visualization. Install with: python3 -m pip install matplotlib"
+    )
     sys.exit(1)
 
 
@@ -97,8 +99,22 @@ def main():
     weights.w_rot = 1.0
 
     limits = irc.JointLimits()
-    limits.lower = [deg2rad(-170), deg2rad(-110), deg2rad(-170), deg2rad(-190), deg2rad(-120), deg2rad(-400)]
-    limits.upper = [deg2rad(170), deg2rad(110), deg2rad(170), deg2rad(190), deg2rad(120), deg2rad(400)]
+    limits.lower = [
+        deg2rad(-170),
+        deg2rad(-110),
+        deg2rad(-170),
+        deg2rad(-190),
+        deg2rad(-120),
+        deg2rad(-400),
+    ]
+    limits.upper = [
+        deg2rad(170),
+        deg2rad(110),
+        deg2rad(170),
+        deg2rad(190),
+        deg2rad(120),
+        deg2rad(400),
+    ]
     limits.max_step = [deg2rad(10.0)] * 6
     limits.clamp_to_limits = True
 

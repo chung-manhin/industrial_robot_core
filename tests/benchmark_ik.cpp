@@ -16,40 +16,41 @@
 #include <vector>
 
 using robot::DHParam;
-using robot::IKSolverDls;
 using robot::IkOptions;
 using robot::IkResult;
+using robot::IKSolverDls;
 using robot::IkStatus;
 using robot::JointLimits;
 using robot::RobotArm;
 using robot::TaskSpaceWeights;
 using robot::Vector6d;
 
-static double deg2rad(double deg) { return deg * M_PI / 180.0; }
+static double deg2rad(double deg) {
+    return deg * M_PI / 180.0;
+}
 
 static std::vector<DHParam> makeIrb120Dh() {
     // ABB IRB 120 standard DH. Units: mm.
     return {
-        {0.0, deg2rad(-90.0), 290.0, 0.0},            // 1
-        {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},   // 2 (offset)
-        {70.0, deg2rad(-90.0), 0.0, 0.0},             // 3
-        {0.0, deg2rad(90.0), 302.0, 0.0},             // 4
-        {0.0, deg2rad(-90.0), 0.0, 0.0},              // 5
-        {0.0, deg2rad(0.0), 72.0, 0.0}                // 6
+        {0.0, deg2rad(-90.0), 290.0, 0.0},          // 1
+        {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)}, // 2 (offset)
+        {70.0, deg2rad(-90.0), 0.0, 0.0},           // 3
+        {0.0, deg2rad(90.0), 302.0, 0.0},           // 4
+        {0.0, deg2rad(-90.0), 0.0, 0.0},            // 5
+        {0.0, deg2rad(0.0), 72.0, 0.0}              // 6
     };
 }
 
-enum class SeedMode {
-    kSingle,
-    kMulti
-};
+enum class SeedMode { kSingle, kMulti };
 
 static SeedMode parseSeedMode(int argc, char** argv) {
     SeedMode mode = SeedMode::kMulti;
     for (int i = 1; i < argc; ++i) {
         const std::string_view a(argv[i]);
-        if (a == "--single-seed") mode = SeedMode::kSingle;
-        if (a == "--multi-seed") mode = SeedMode::kMulti;
+        if (a == "--single-seed")
+            mode = SeedMode::kSingle;
+        if (a == "--multi-seed")
+            mode = SeedMode::kMulti;
     }
     return mode;
 }
@@ -84,8 +85,10 @@ int main(int argc, char** argv) {
     weights.w_rot = 1.0;
 
     JointLimits limits;
-    limits.lower << deg2rad(-170), deg2rad(-110), deg2rad(-170), deg2rad(-190), deg2rad(-120), deg2rad(-400);
-    limits.upper << deg2rad(170), deg2rad(110), deg2rad(170), deg2rad(190), deg2rad(120), deg2rad(400);
+    limits.lower << deg2rad(-170), deg2rad(-110), deg2rad(-170), deg2rad(-190), deg2rad(-120),
+        deg2rad(-400);
+    limits.upper << deg2rad(170), deg2rad(110), deg2rad(170), deg2rad(190), deg2rad(120),
+        deg2rad(400);
     limits.max_step = Vector6d::Constant(deg2rad(10.0));
     limits.clamp_to_limits = true;
 
@@ -124,7 +127,8 @@ int main(int argc, char** argv) {
     for (int t = 0; t < kTrials; ++t) {
         // Sample a random reachable target by FK from a random joint vector.
         Vector6d q_target;
-        for (int i = 0; i < 6; ++i) q_target(i) = uni(rng);
+        for (int i = 0; i < 6; ++i)
+            q_target(i) = uni(rng);
 
         const robot::Matrix4d T_target = arm.computeFK(q_target);
 
@@ -140,18 +144,21 @@ int main(int argc, char** argv) {
             seeds[0] = q_target;
             seeds[1] = Vector6d::Zero();
             for (int k = 2; k < 5; ++k) {
-                for (int i = 0; i < 6; ++i) seeds[k](i) = uni(rng);
+                for (int i = 0; i < 6; ++i)
+                    seeds[k](i) = uni(rng);
             }
         }
 
         const auto t0 = std::chrono::high_resolution_clock::now();
-        const IkResult r = solver.solveBestOf(T_target, seeds, opt, &limits, weights, &ws, &q_target);
+        const IkResult r =
+            solver.solveBestOf(T_target, seeds, opt, &limits, weights, &ws, &q_target);
         const auto t1 = std::chrono::high_resolution_clock::now();
 
         const double us = std::chrono::duration<double, std::micro>(t1 - t0).count();
         times_us.push_back(us);
 
-        if (r.status == IkStatus::kSuccess) ++success;
+        if (r.status == IkStatus::kSuccess)
+            ++success;
     }
 
     std::sort(times_us.begin(), times_us.end());

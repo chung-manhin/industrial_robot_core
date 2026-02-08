@@ -10,19 +10,22 @@
 #include <vector>
 
 using robot::DHParam;
-using robot::IKSolverDls;
 using robot::IkOptions;
 using robot::IkResult;
+using robot::IKSolverDls;
 using robot::IkStatus;
 using robot::RobotArm;
 using robot::TaskSpaceWeights;
 using robot::Vector6d;
 
-static double deg2rad(double deg) { return deg * M_PI / 180.0; }
+static double deg2rad(double deg) {
+    return deg * M_PI / 180.0;
+}
 
 static bool allFinite(const Vector6d& q) {
     for (int i = 0; i < 6; ++i) {
-        if (!std::isfinite(q(i))) return false;
+        if (!std::isfinite(q(i)))
+            return false;
     }
     return true;
 }
@@ -30,13 +33,9 @@ static bool allFinite(const Vector6d& q) {
 int main() {
     // IRB120-style DH (mm).
     const std::vector<DHParam> dh = {
-        {0.0, deg2rad(-90.0), 290.0, 0.0},
-        {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},
-        {70.0, deg2rad(-90.0), 0.0, 0.0},
-        {0.0, deg2rad(90.0), 302.0, 0.0},
-        {0.0, deg2rad(-90.0), 0.0, 0.0},
-        {0.0, deg2rad(0.0), 72.0, 0.0}
-    };
+        {0.0, deg2rad(-90.0), 290.0, 0.0}, {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},
+        {70.0, deg2rad(-90.0), 0.0, 0.0},  {0.0, deg2rad(90.0), 302.0, 0.0},
+        {0.0, deg2rad(-90.0), 0.0, 0.0},   {0.0, deg2rad(0.0), 72.0, 0.0}};
 
     RobotArm arm(dh);
     assert(arm.isValid());
@@ -96,7 +95,8 @@ int main() {
     // If solver claims success, it must meet tolerance.
     if (r.status == IkStatus::kSuccess) {
         if (!(r.final_error < opt.tol)) {
-            std::cerr << "Success but error above tol. final_error=" << r.final_error << " tol=" << opt.tol << "\n";
+            std::cerr << "Success but error above tol. final_error=" << r.final_error
+                      << " tol=" << opt.tol << "\n";
             return 1;
         }
     } else {

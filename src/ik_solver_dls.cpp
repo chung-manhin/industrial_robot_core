@@ -25,8 +25,10 @@ inline void clampQ(Vector6d* q, const JointLimits& limits) {
 
 inline bool violatesLimits(const Vector6d& q, const JointLimits& limits) {
     for (int i = 0; i < 6; ++i) {
-        if (q(i) < limits.lower(i) - 1e-12) return true;
-        if (q(i) > limits.upper(i) + 1e-12) return true;
+        if (q(i) < limits.lower(i) - 1e-12)
+            return true;
+        if (q(i) > limits.upper(i) + 1e-12)
+            return true;
     }
     return false;
 }
@@ -43,16 +45,15 @@ inline void limitStep(Vector6d* dq, const Vector6d& max_step) {
 inline double manipulabilityFromJJt(const Eigen::Matrix<double, 6, 6>& JJt, double eps) {
     // w = sqrt(det(JJ^T)). 6x6 fixed size.
     const double det = JJt.determinant();
-    if (!std::isfinite(det)) return 0.0;
+    if (!std::isfinite(det))
+        return 0.0;
     return std::sqrt(std::max(0.0, det) + eps);
 }
 
 } // namespace
 
-IkResult IKSolverDls::solve(const Matrix4d& target_pose,
-                            const Vector6d& seed,
-                            const IkOptions& options,
-                            const JointLimits* limits,
+IkResult IKSolverDls::solve(const Matrix4d& target_pose, const Vector6d& seed,
+                            const IkOptions& options, const JointLimits* limits,
                             const TaskSpaceWeights& weights,
                             IkWorkspace* workspace) const noexcept {
     IkResult out;
@@ -133,8 +134,7 @@ IkResult IKSolverDls::solve(const Matrix4d& target_pose,
         //   dq = J^T (J J^T + λ^2 I)^{-1} e
         const double w = manipulabilityFromJJt(ws->JJt, options.eps);
         const double lambda = clampd(options.lambda0 * (options.w_ref / (w + options.eps)),
-                                     options.lambda_min,
-                                     options.lambda_max);
+                                     options.lambda_min, options.lambda_max);
 
         ws->A = ws->JJt;
         ws->A.diagonal().array() += (lambda * lambda);
@@ -160,14 +160,15 @@ IkResult IKSolverDls::solve(const Matrix4d& target_pose,
         // Optional nullspace avoidance (soft constraint): push towards joint mid-range.
         if (limits && limits->enable_avoidance && limits->avoidance_gain > 0.0) {
             // J_pinv = J^T (JJ^T + λ^2 I)^-1
-            ws->J_pinv.noalias() = ws->J.transpose() *
-                                   ws->ldlt.solve(Eigen::Matrix<double, 6, 6>::Identity());
+            ws->J_pinv.noalias() =
+                ws->J.transpose() * ws->ldlt.solve(Eigen::Matrix<double, 6, 6>::Identity());
             ws->N.noalias() = Eigen::Matrix<double, 6, 6>::Identity() - ws->J_pinv * ws->J;
 
             Vector6d q_mid = 0.5 * (limits->lower + limits->upper);
             Vector6d range = (limits->upper - limits->lower);
             for (int i = 0; i < 6; ++i) {
-                if (std::abs(range(i)) < 1e-12) range(i) = 1.0;
+                if (std::abs(range(i)) < 1e-12)
+                    range(i) = 1.0;
             }
             const Vector6d g = (q - q_mid).cwiseQuotient(range);
             const Vector6d dq_avoid = -limits->avoidance_gain * g;
@@ -196,12 +197,9 @@ IkResult IKSolverDls::solve(const Matrix4d& target_pose,
     return out;
 }
 
-IkResult IKSolverDls::solveBestOf(const Matrix4d& target_pose,
-                                  const std::vector<Vector6d>& seeds,
-                                  const IkOptions& options,
-                                  const JointLimits* limits,
-                                  const TaskSpaceWeights& weights,
-                                  IkWorkspace* workspace,
+IkResult IKSolverDls::solveBestOf(const Matrix4d& target_pose, const std::vector<Vector6d>& seeds,
+                                  const IkOptions& options, const JointLimits* limits,
+                                  const TaskSpaceWeights& weights, IkWorkspace* workspace,
                                   const Vector6d* preferred) const noexcept {
     IkResult best;
     bool best_set = false;
@@ -219,13 +217,15 @@ IkResult IKSolverDls::solveBestOf(const Matrix4d& target_pose,
         } else {
             const bool best_ok = (best.status == IkStatus::kSuccess);
             if (ok != best_ok) {
-                if (ok) best = r;
+                if (ok)
+                    best = r;
             } else if (r.final_error < best.final_error - 1e-12) {
                 best = r;
             } else if (preferred && std::abs(r.final_error - best.final_error) <= 1e-12) {
                 const double d_r = (r.q - *preferred).norm();
                 const double d_b = (best.q - *preferred).norm();
-                if (d_r < d_b) best = r;
+                if (d_r < d_b)
+                    best = r;
             }
         }
 

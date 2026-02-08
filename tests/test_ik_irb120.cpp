@@ -9,26 +9,24 @@
 #include <vector>
 
 using robot::DHParam;
-using robot::IKSolverDls;
 using robot::IkOptions;
 using robot::IkResult;
+using robot::IKSolverDls;
 using robot::IkStatus;
 using robot::JointLimits;
 using robot::RobotArm;
 using robot::TaskSpaceWeights;
 using robot::Vector6d;
 
-static double deg2rad(double deg) { return deg * M_PI / 180.0; }
+static double deg2rad(double deg) {
+    return deg * M_PI / 180.0;
+}
 
 int main() {
     const std::vector<DHParam> dh = {
-        {0.0, deg2rad(-90.0), 290.0, 0.0},
-        {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},
-        {70.0, deg2rad(-90.0), 0.0, 0.0},
-        {0.0, deg2rad(90.0), 302.0, 0.0},
-        {0.0, deg2rad(-90.0), 0.0, 0.0},
-        {0.0, deg2rad(0.0), 72.0, 0.0}
-    };
+        {0.0, deg2rad(-90.0), 290.0, 0.0}, {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},
+        {70.0, deg2rad(-90.0), 0.0, 0.0},  {0.0, deg2rad(90.0), 302.0, 0.0},
+        {0.0, deg2rad(-90.0), 0.0, 0.0},   {0.0, deg2rad(0.0), 72.0, 0.0}};
 
     RobotArm arm(dh);
     assert(arm.isValid());
@@ -44,8 +42,10 @@ int main() {
     weights.w_rot = 1.0;
 
     JointLimits limits;
-    limits.lower << deg2rad(-170), deg2rad(-110), deg2rad(-170), deg2rad(-190), deg2rad(-120), deg2rad(-400);
-    limits.upper << deg2rad(170), deg2rad(110), deg2rad(170), deg2rad(190), deg2rad(120), deg2rad(400);
+    limits.lower << deg2rad(-170), deg2rad(-110), deg2rad(-170), deg2rad(-190), deg2rad(-120),
+        deg2rad(-400);
+    limits.upper << deg2rad(170), deg2rad(110), deg2rad(170), deg2rad(190), deg2rad(120),
+        deg2rad(400);
     limits.max_step = Vector6d::Constant(deg2rad(10.0));
     limits.clamp_to_limits = true;
 
@@ -84,7 +84,8 @@ int main() {
         std::cerr << "Unexpected status in clamp mode: " << static_cast<int>(r2.status) << "\n";
         return 1;
     }
-    if (r2.q.minCoeff() < limits.lower.minCoeff() - 1e-9 || r2.q.maxCoeff() > limits.upper.maxCoeff() + 1e-9) {
+    if (r2.q.minCoeff() < limits.lower.minCoeff() - 1e-9 ||
+        r2.q.maxCoeff() > limits.upper.maxCoeff() + 1e-9) {
         std::cerr << "Clamping did not respect limits\n";
         return 1;
     }

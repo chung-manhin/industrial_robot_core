@@ -9,17 +9,15 @@ using robot::DHParam;
 using robot::RobotArm;
 using robot::Vector6d;
 
-static double deg2rad(double deg) { return deg * M_PI / 180.0; }
+static double deg2rad(double deg) {
+    return deg * M_PI / 180.0;
+}
 
 int main() {
     const std::vector<DHParam> dh = {
-        {0.0, deg2rad(-90.0), 290.0, 0.0},
-        {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},
-        {70.0, deg2rad(-90.0), 0.0, 0.0},
-        {0.0, deg2rad(90.0), 302.0, 0.0},
-        {0.0, deg2rad(-90.0), 0.0, 0.0},
-        {0.0, deg2rad(0.0), 72.0, 0.0}
-    };
+        {0.0, deg2rad(-90.0), 290.0, 0.0}, {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},
+        {70.0, deg2rad(-90.0), 0.0, 0.0},  {0.0, deg2rad(90.0), 302.0, 0.0},
+        {0.0, deg2rad(-90.0), 0.0, 0.0},   {0.0, deg2rad(0.0), 72.0, 0.0}};
 
     RobotArm arm(dh);
     assert(arm.isValid());

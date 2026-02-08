@@ -11,14 +11,14 @@ using Matrix6d = Eigen::Matrix<double, 6, 6>;
 using Matrix4d = Eigen::Matrix<double, 4, 4>;
 
 struct DHParam {
-    double a;      // link length (mm or m, consistent)
-    double alpha;  // link twist (rad)
-    double d;      // link offset
-    double theta;  // joint angle offset (rad)
+    double a;     // link length (mm or m, consistent)
+    double alpha; // link twist (rad)
+    double d;     // link offset
+    double theta; // joint angle offset (rad)
 };
 
 class RobotArm {
-public:
+  public:
     RobotArm() = default;
     explicit RobotArm(const std::vector<DHParam>& dh_params);
 
@@ -45,7 +45,7 @@ public:
     // SO(3) log map: returns rotation vector (axis * angle) in radians.
     static Eigen::Vector3d so3LogVee(const Eigen::Matrix3d& R) noexcept;
 
-private:
+  private:
     std::array<DHParam, 6> dh_{};
     bool valid_ = false;
 

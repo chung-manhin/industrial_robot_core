@@ -11,29 +11,31 @@
 #include <vector>
 
 using robot::DHParam;
-using robot::IKSolverDls;
 using robot::IkOptions;
 using robot::IkResult;
+using robot::IKSolverDls;
 using robot::IkStatus;
 using robot::JointLimits;
 using robot::RobotArm;
 using robot::TaskSpaceWeights;
 using robot::Vector6d;
 
-static double deg2rad(double deg) { return deg * M_PI / 180.0; }
+static double deg2rad(double deg) {
+    return deg * M_PI / 180.0;
+}
 
 static const char* statusToStr(IkStatus s) {
     switch (s) {
-        case IkStatus::kSuccess:
-            return "Success";
-        case IkStatus::kNoConvergence:
-            return "NoConvergence";
-        case IkStatus::kInvalidInput:
-            return "InvalidInput";
-        case IkStatus::kLimitViolation:
-            return "LimitViolation";
-        case IkStatus::kNumericalIssue:
-            return "NumericalIssue";
+    case IkStatus::kSuccess:
+        return "Success";
+    case IkStatus::kNoConvergence:
+        return "NoConvergence";
+    case IkStatus::kInvalidInput:
+        return "InvalidInput";
+    case IkStatus::kLimitViolation:
+        return "LimitViolation";
+    case IkStatus::kNumericalIssue:
+        return "NumericalIssue";
     }
     return "Unknown";
 }
@@ -42,12 +44,12 @@ int main() {
     // ABB IRB 120 standard DH. Units: mm.
     // Note: Link 2 has joint offset -90 deg: theta = q2 - 90deg => dh.theta = -90deg.
     const std::vector<DHParam> dh = {
-        {0.0, deg2rad(-90.0), 290.0, 0.0},           // 1
-        {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},  // 2 (offset)
-        {70.0, deg2rad(-90.0), 0.0, 0.0},            // 3
-        {0.0, deg2rad(90.0), 302.0, 0.0},            // 4
-        {0.0, deg2rad(-90.0), 0.0, 0.0},             // 5
-        {0.0, deg2rad(0.0), 72.0, 0.0}               // 6
+        {0.0, deg2rad(-90.0), 290.0, 0.0},          // 1
+        {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)}, // 2 (offset)
+        {70.0, deg2rad(-90.0), 0.0, 0.0},           // 3
+        {0.0, deg2rad(90.0), 302.0, 0.0},           // 4
+        {0.0, deg2rad(-90.0), 0.0, 0.0},            // 5
+        {0.0, deg2rad(0.0), 72.0, 0.0}              // 6
     };
 
     RobotArm arm(dh);
@@ -62,14 +64,16 @@ int main() {
     const Eigen::Matrix<double, 4, 4> T_target = arm.computeFK(q_target);
 
     TaskSpaceWeights weights;
-    weights.pos_unit = 0.001;  // mm -> m
+    weights.pos_unit = 0.001; // mm -> m
     weights.w_pos = 1.0;
     weights.w_rot = 1.0;
 
     JointLimits limits;
     // Reasonable generic bounds (rad). Can be replaced with exact ABB spec later.
-    limits.lower << deg2rad(-170), deg2rad(-110), deg2rad(-170), deg2rad(-190), deg2rad(-120), deg2rad(-400);
-    limits.upper << deg2rad(170), deg2rad(110), deg2rad(170), deg2rad(190), deg2rad(120), deg2rad(400);
+    limits.lower << deg2rad(-170), deg2rad(-110), deg2rad(-170), deg2rad(-190), deg2rad(-120),
+        deg2rad(-400);
+    limits.upper << deg2rad(170), deg2rad(110), deg2rad(170), deg2rad(190), deg2rad(120),
+        deg2rad(400);
     limits.max_step = Vector6d::Constant(deg2rad(10.0));
     limits.clamp_to_limits = true;
 
@@ -83,7 +87,8 @@ int main() {
     seeds.push_back(q_target);
     for (int k = 0; k < 2; ++k) {
         Vector6d q;
-        for (int i = 0; i < 6; ++i) q(i) = uni(rng);
+        for (int i = 0; i < 6; ++i)
+            q(i) = uni(rng);
         seeds.push_back(q);
     }
 

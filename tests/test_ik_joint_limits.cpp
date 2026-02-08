@@ -9,21 +9,25 @@
 #include <vector>
 
 using robot::DHParam;
-using robot::IKSolverDls;
 using robot::IkOptions;
 using robot::IkResult;
+using robot::IKSolverDls;
 using robot::IkStatus;
 using robot::JointLimits;
 using robot::RobotArm;
 using robot::TaskSpaceWeights;
 using robot::Vector6d;
 
-static double deg2rad(double deg) { return deg * M_PI / 180.0; }
+static double deg2rad(double deg) {
+    return deg * M_PI / 180.0;
+}
 
 static bool withinLimits(const Vector6d& q, const JointLimits& lim, double eps) {
     for (int i = 0; i < 6; ++i) {
-        if (q(i) < lim.lower(i) - eps) return false;
-        if (q(i) > lim.upper(i) + eps) return false;
+        if (q(i) < lim.lower(i) - eps)
+            return false;
+        if (q(i) > lim.upper(i) + eps)
+            return false;
     }
     return true;
 }
@@ -31,13 +35,9 @@ static bool withinLimits(const Vector6d& q, const JointLimits& lim, double eps) 
 int main() {
     // Same IRB120-style DH (mm) as other regression tests.
     const std::vector<DHParam> dh = {
-        {0.0, deg2rad(-90.0), 290.0, 0.0},
-        {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},
-        {70.0, deg2rad(-90.0), 0.0, 0.0},
-        {0.0, deg2rad(90.0), 302.0, 0.0},
-        {0.0, deg2rad(-90.0), 0.0, 0.0},
-        {0.0, deg2rad(0.0), 72.0, 0.0}
-    };
+        {0.0, deg2rad(-90.0), 290.0, 0.0}, {270.0, deg2rad(0.0), 0.0, deg2rad(-90.0)},
+        {70.0, deg2rad(-90.0), 0.0, 0.0},  {0.0, deg2rad(90.0), 302.0, 0.0},
+        {0.0, deg2rad(-90.0), 0.0, 0.0},   {0.0, deg2rad(0.0), 72.0, 0.0}};
 
     RobotArm arm(dh);
     assert(arm.isValid());
@@ -93,7 +93,8 @@ int main() {
     }
 
     if (!(r.final_error < opt.tol)) {
-        std::cerr << "final_error not below tol. final_error=" << r.final_error << " tol=" << opt.tol << "\n";
+        std::cerr << "final_error not below tol. final_error=" << r.final_error
+                  << " tol=" << opt.tol << "\n";
         return 1;
     }
 

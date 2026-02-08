@@ -9,7 +9,7 @@
 namespace robot {
 
 class IKSolverDls {
-public:
+  public:
     explicit IKSolverDls(const RobotArm& arm) : arm_(arm) {}
 
     // Damped Least-Squares (DLS) IK.
@@ -28,10 +28,8 @@ public:
     //   λ is adapted from a manipulability measure w = sqrt(det(J J^T)) and
     //   clamped into [lambda_min, lambda_max]:
     //     λ = clamp(lambda0 * (w_ref / (w + eps)), lambda_min, lambda_max)
-    IkResult solve(const Matrix4d& target_pose,
-                   const Vector6d& seed,
-                   const IkOptions& options = IkOptions{},
-                   const JointLimits* limits = nullptr,
+    IkResult solve(const Matrix4d& target_pose, const Vector6d& seed,
+                   const IkOptions& options = IkOptions{}, const JointLimits* limits = nullptr,
                    const TaskSpaceWeights& weights = TaskSpaceWeights{},
                    IkWorkspace* workspace = nullptr) const noexcept;
 
@@ -45,15 +43,14 @@ public:
     // Early return:
     //   If a seed reaches tolerance (final_error <= options.tol), return it
     //   immediately without trying remaining seeds.
-    IkResult solveBestOf(const Matrix4d& target_pose,
-                         const std::vector<Vector6d>& seeds,
+    IkResult solveBestOf(const Matrix4d& target_pose, const std::vector<Vector6d>& seeds,
                          const IkOptions& options = IkOptions{},
                          const JointLimits* limits = nullptr,
                          const TaskSpaceWeights& weights = TaskSpaceWeights{},
                          IkWorkspace* workspace = nullptr,
                          const Vector6d* preferred = nullptr) const noexcept;
 
-private:
+  private:
     const RobotArm& arm_;
 };
 

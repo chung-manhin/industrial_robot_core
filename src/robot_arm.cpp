@@ -12,7 +12,8 @@ RobotArm::RobotArm(const std::vector<DHParam>& dh_params) {
 }
 
 bool RobotArm::TryCreate(const std::vector<DHParam>& dh_params, RobotArm* out) noexcept {
-    if (!out) return false;
+    if (!out)
+        return false;
     if (dh_params.size() != 6) {
         out->valid_ = false;
         return false;
@@ -32,10 +33,8 @@ Matrix4d RobotArm::dhToTransform(double a, double alpha, double d, double theta)
     const double sa = std::sin(alpha);
 
     Matrix4d T;
-    T << ct, -st * ca, st * sa, a * ct,
-         st, ct * ca, -ct * sa, a * st,
-         0.0, sa, ca, d,
-         0.0, 0.0, 0.0, 1.0;
+    T << ct, -st * ca, st * sa, a * ct, st, ct * ca, -ct * sa, a * st, 0.0, sa, ca, d, 0.0, 0.0,
+        0.0, 1.0;
     return T;
 }
 
@@ -59,9 +58,12 @@ Eigen::Vector3d RobotArm::so3LogVee(const Eigen::Matrix3d& R) noexcept {
         axis.z() = std::sqrt(std::max(0.0, 0.5 * (R(2, 2) + 1.0)));
 
         // Pick signs using off-diagonals.
-        if (R(2, 1) - R(1, 2) < 0) axis.x() = -axis.x();
-        if (R(0, 2) - R(2, 0) < 0) axis.y() = -axis.y();
-        if (R(1, 0) - R(0, 1) < 0) axis.z() = -axis.z();
+        if (R(2, 1) - R(1, 2) < 0)
+            axis.x() = -axis.x();
+        if (R(0, 2) - R(2, 0) < 0)
+            axis.y() = -axis.y();
+        if (R(1, 0) - R(0, 1) < 0)
+            axis.z() = -axis.z();
 
         const double n = axis.norm();
         if (n < 1e-12) {
@@ -77,7 +79,8 @@ Eigen::Vector3d RobotArm::so3LogVee(const Eigen::Matrix3d& R) noexcept {
 }
 
 Matrix4d RobotArm::computeFK(const Vector6d& joints) const {
-    if (!valid_) return Matrix4d::Identity();
+    if (!valid_)
+        return Matrix4d::Identity();
 
     Matrix4d T = Matrix4d::Identity();
     for (int i = 0; i < 6; ++i) {
@@ -90,7 +93,8 @@ Matrix4d RobotArm::computeFK(const Vector6d& joints) const {
 std::array<Eigen::Vector3d, 7> RobotArm::forwardKinematicsChain(const Vector6d& joints) const {
     std::array<Eigen::Vector3d, 7> p{};
     if (!valid_) {
-        for (auto& v : p) v.setZero();
+        for (auto& v : p)
+            v.setZero();
         return p;
     }
 
@@ -107,7 +111,8 @@ std::array<Eigen::Vector3d, 7> RobotArm::forwardKinematicsChain(const Vector6d& 
 }
 
 Matrix6d RobotArm::computeJacobian(const Vector6d& joints) const {
-    if (!valid_) return Matrix6d::Zero();
+    if (!valid_)
+        return Matrix6d::Zero();
 
     std::array<Eigen::Vector3d, 7> p;
     std::array<Eigen::Vector3d, 7> z;
@@ -141,7 +146,8 @@ Matrix6d RobotArm::computeJacobian(const Vector6d& joints) const {
 }
 
 bool RobotArm::computeIK(const Matrix4d& target_pose, Vector6d& q) const {
-    if (!valid_) return false;
+    if (!valid_)
+        return false;
 
     IKSolverDls solver(*this);
     TaskSpaceWeights weights;

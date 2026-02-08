@@ -6,13 +6,7 @@ namespace robot {
 
 using Vector6d = Eigen::Matrix<double, 6, 1>;
 
-enum class IkStatus {
-    kSuccess,
-    kNoConvergence,
-    kInvalidInput,
-    kLimitViolation,
-    kNumericalIssue
-};
+enum class IkStatus { kSuccess, kNoConvergence, kInvalidInput, kLimitViolation, kNumericalIssue };
 
 struct JointLimits {
     Vector6d lower = Vector6d::Constant(-1.0e9);

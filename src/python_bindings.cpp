@@ -21,13 +21,15 @@ using PyMatrix6 = std::array<std::array<double, 6>, 6>;
 
 static robot::Vector6d toEigen(const PyVector6& v) {
     robot::Vector6d out;
-    for (int i = 0; i < 6; ++i) out(i) = v[static_cast<size_t>(i)];
+    for (int i = 0; i < 6; ++i)
+        out(i) = v[static_cast<size_t>(i)];
     return out;
 }
 
 static PyVector6 fromEigen(const robot::Vector6d& v) {
     PyVector6 out{};
-    for (int i = 0; i < 6; ++i) out[static_cast<size_t>(i)] = v(i);
+    for (int i = 0; i < 6; ++i)
+        out[static_cast<size_t>(i)] = v(i);
     return out;
 }
 
@@ -72,9 +74,9 @@ static PyChain fromChain(const std::array<Eigen::Vector3d, 7>& chain) {
 }
 
 struct PyJointLimits {
-    PyVector6 lower{ -1e9, -1e9, -1e9, -1e9, -1e9, -1e9 };
-    PyVector6 upper{ 1e9, 1e9, 1e9, 1e9, 1e9, 1e9 };
-    PyVector6 max_step{ 1e9, 1e9, 1e9, 1e9, 1e9, 1e9 };
+    PyVector6 lower{-1e9, -1e9, -1e9, -1e9, -1e9, -1e9};
+    PyVector6 upper{1e9, 1e9, 1e9, 1e9, 1e9, 1e9};
+    PyVector6 max_step{1e9, 1e9, 1e9, 1e9, 1e9, 1e9};
 
     bool clamp_to_limits = true;
     bool enable_avoidance = false;
@@ -163,72 +165,72 @@ PYBIND11_MODULE(industrial_robot_core, m) {
     py::class_<robot::RobotArm>(m, "RobotArm")
         .def(py::init<const std::vector<robot::DHParam>&>())
         .def("isValid", &robot::RobotArm::isValid)
-        .def("computeFK",
-             [](const robot::RobotArm& self, const PyVector6& joints) { return fromEigen(self.computeFK(toEigen(joints))); },
-             py::arg("joints"))
-        .def("computeJacobian",
-             [](const robot::RobotArm& self, const PyVector6& joints) { return fromEigen(self.computeJacobian(toEigen(joints))); },
-             py::arg("joints"))
-        .def("forwardKinematicsChain",
-             [](const robot::RobotArm& self, const PyVector6& joints) {
-                 return fromChain(self.forwardKinematicsChain(toEigen(joints)));
-             },
-             py::arg("joints"));
+        .def(
+            "computeFK",
+            [](const robot::RobotArm& self, const PyVector6& joints) {
+                return fromEigen(self.computeFK(toEigen(joints)));
+            },
+            py::arg("joints"))
+        .def(
+            "computeJacobian",
+            [](const robot::RobotArm& self, const PyVector6& joints) {
+                return fromEigen(self.computeJacobian(toEigen(joints)));
+            },
+            py::arg("joints"))
+        .def(
+            "forwardKinematicsChain",
+            [](const robot::RobotArm& self, const PyVector6& joints) {
+                return fromChain(self.forwardKinematicsChain(toEigen(joints)));
+            },
+            py::arg("joints"));
 
     py::class_<robot::IKSolverDls>(m, "IKSolverDls")
         .def(py::init<const robot::RobotArm&>(), py::keep_alive<1, 2>())
-        .def("solve",
-             [](const robot::IKSolverDls& self,
-                const PyMatrix4& target_pose,
-                const PyVector6& seed,
-                const robot::IkOptions& options,
-                const std::optional<PyJointLimits>& limits,
-                const robot::TaskSpaceWeights& weights) {
-                 const robot::Matrix4d T = toEigen(target_pose);
-                 const robot::Vector6d q0 = toEigen(seed);
+        .def(
+            "solve",
+            [](const robot::IKSolverDls& self, const PyMatrix4& target_pose, const PyVector6& seed,
+               const robot::IkOptions& options, const std::optional<PyJointLimits>& limits,
+               const robot::TaskSpaceWeights& weights) {
+                const robot::Matrix4d T = toEigen(target_pose);
+                const robot::Vector6d q0 = toEigen(seed);
 
-                 if (limits) {
-                     const robot::JointLimits l = toCore(*limits);
-                     return fromCore(self.solve(T, q0, options, &l, weights, nullptr));
-                 }
-                 return fromCore(self.solve(T, q0, options, nullptr, weights, nullptr));
-             },
-             py::arg("target_pose"),
-             py::arg("seed"),
-             py::arg("options") = robot::IkOptions{},
-             py::arg("limits") = py::none(),
-             py::arg("weights") = robot::TaskSpaceWeights{})
-        .def("solveBestOf",
-             [](const robot::IKSolverDls& self,
-                const PyMatrix4& target_pose,
-                const std::vector<PyVector6>& seeds,
-                const robot::IkOptions& options,
-                const std::optional<PyJointLimits>& limits,
-                const robot::TaskSpaceWeights& weights,
-                const std::optional<PyVector6>& preferred) {
-                 const robot::Matrix4d T = toEigen(target_pose);
+                if (limits) {
+                    const robot::JointLimits l = toCore(*limits);
+                    return fromCore(self.solve(T, q0, options, &l, weights, nullptr));
+                }
+                return fromCore(self.solve(T, q0, options, nullptr, weights, nullptr));
+            },
+            py::arg("target_pose"), py::arg("seed"), py::arg("options") = robot::IkOptions{},
+            py::arg("limits") = py::none(), py::arg("weights") = robot::TaskSpaceWeights{})
+        .def(
+            "solveBestOf",
+            [](const robot::IKSolverDls& self, const PyMatrix4& target_pose,
+               const std::vector<PyVector6>& seeds, const robot::IkOptions& options,
+               const std::optional<PyJointLimits>& limits, const robot::TaskSpaceWeights& weights,
+               const std::optional<PyVector6>& preferred) {
+                const robot::Matrix4d T = toEigen(target_pose);
 
-                 std::vector<robot::Vector6d> seeds_e;
-                 seeds_e.reserve(seeds.size());
-                 for (const auto& s : seeds) seeds_e.push_back(toEigen(s));
+                std::vector<robot::Vector6d> seeds_e;
+                seeds_e.reserve(seeds.size());
+                for (const auto& s : seeds)
+                    seeds_e.push_back(toEigen(s));
 
-                 const robot::Vector6d* pref_ptr = nullptr;
-                 robot::Vector6d pref_e;
-                 if (preferred) {
-                     pref_e = toEigen(*preferred);
-                     pref_ptr = &pref_e;
-                 }
+                const robot::Vector6d* pref_ptr = nullptr;
+                robot::Vector6d pref_e;
+                if (preferred) {
+                    pref_e = toEigen(*preferred);
+                    pref_ptr = &pref_e;
+                }
 
-                 if (limits) {
-                     const robot::JointLimits l = toCore(*limits);
-                     return fromCore(self.solveBestOf(T, seeds_e, options, &l, weights, nullptr, pref_ptr));
-                 }
-                 return fromCore(self.solveBestOf(T, seeds_e, options, nullptr, weights, nullptr, pref_ptr));
-             },
-             py::arg("target_pose"),
-             py::arg("seeds"),
-             py::arg("options") = robot::IkOptions{},
-             py::arg("limits") = py::none(),
-             py::arg("weights") = robot::TaskSpaceWeights{},
-             py::arg("preferred") = py::none());
+                if (limits) {
+                    const robot::JointLimits l = toCore(*limits);
+                    return fromCore(
+                        self.solveBestOf(T, seeds_e, options, &l, weights, nullptr, pref_ptr));
+                }
+                return fromCore(
+                    self.solveBestOf(T, seeds_e, options, nullptr, weights, nullptr, pref_ptr));
+            },
+            py::arg("target_pose"), py::arg("seeds"), py::arg("options") = robot::IkOptions{},
+            py::arg("limits") = py::none(), py::arg("weights") = robot::TaskSpaceWeights{},
+            py::arg("preferred") = py::none());
 }
