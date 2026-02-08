@@ -13,6 +13,7 @@ compile_commands.json
 
 # python
 __pycache__/
+pycache/
 *.pyc
 .venv/
 venv/
