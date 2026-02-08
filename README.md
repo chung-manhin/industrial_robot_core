@@ -117,6 +117,29 @@ Preview:
 
 ![UR5 pose](examples/ur5_pose.png)
 
+## CMake install + consumer (find_package)
+
+Install to a prefix (example: `/tmp/install_prefix`) and build a minimal external consumer:
+
+```bash
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build -j
+cmake --install build --prefix /tmp/install_prefix
+
+cmake -S examples/consumer_cmake -B /tmp/consumer_build \
+  -DCMAKE_PREFIX_PATH=/tmp/install_prefix
+cmake --build /tmp/consumer_build -j
+
+/tmp/consumer_build/consumer
+```
+
+The consumer uses:
+
+```cmake
+find_package(robot_motion_core CONFIG REQUIRED)
+target_link_libraries(app PRIVATE robot_motion_core::robot_motion_core)
+```
+
 ## Units / Conventions
 
 - The demo DH parameters in `examples/demo.py` are in **millimeters (mm)**.

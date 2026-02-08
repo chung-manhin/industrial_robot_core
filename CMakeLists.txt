@@ -109,6 +109,7 @@ install(TARGETS robot_motion_core
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
 )
 
 install(DIRECTORY include/ DESTINATION ${CMAKE_INSTALL_INCLUDEDIR})
@@ -117,6 +118,12 @@ install(EXPORT robot_motion_coreTargets
     FILE robot_motion_coreTargets.cmake
     NAMESPACE robot_motion_core::
     DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/robot_motion_core
+)
+
+# Also export a build-tree package for local consumers without install.
+export(EXPORT robot_motion_coreTargets
+    FILE ${CMAKE_CURRENT_BINARY_DIR}/robot_motion_coreTargets.cmake
+    NAMESPACE robot_motion_core::
 )
 
 write_basic_package_version_file(
