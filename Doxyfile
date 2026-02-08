@@ -1,0 +1,24 @@
+# Doxyfile 1.9.x
+
+PROJECT_NAME           = "industrial_robot_core"
+PROJECT_BRIEF          = "Industrial-grade 6-DoF robot motion core (FK/Jacobian/DLS-IK)"
+OUTPUT_DIRECTORY       = docs
+CREATE_SUBDIRS         = NO
+
+INPUT                  = include src
+RECURSIVE              = YES
+FILE_PATTERNS          = *.hpp *.h *.cpp
+
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+
+QUIET                  = YES
+WARN_IF_UNDOCUMENTED   = NO
+WARN_IF_DOC_ERROR      = YES
+
+# Graphs
+HAVE_DOT               = NO

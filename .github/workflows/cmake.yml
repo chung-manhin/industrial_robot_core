@@ -1,0 +1,31 @@
+name: cmake
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libeigen3-dev
+
+      - name: Configure
+        run: |
+          cmake -S industrial_robot_core -B industrial_robot_core/build -DCMAKE_BUILD_TYPE=Release \
+            -DROBOT_MOTION_CORE_BUILD_PYTHON=OFF
+
+      - name: Build
+        run: |
+          cmake --build industrial_robot_core/build --parallel
+
+      - name: Test
+        run: |
+          ctest --test-dir industrial_robot_core/build --output-on-failure
