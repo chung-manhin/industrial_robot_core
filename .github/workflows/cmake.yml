@@ -66,6 +66,7 @@ jobs:
           MPLBACKEND: Agg
           CCACHE_DIR: ${{ env.CCACHE_DIR }}
         run: |
+          mkdir -p build
           ./tools/ci_smoke.sh 2>&1 | tee build/ci_smoke.log
 
       - name: Upload artifacts
